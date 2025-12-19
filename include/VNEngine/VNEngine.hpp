@@ -1,6 +1,6 @@
 #pragma once
-
 #include <SDL3/SDL.h>
+#include <SDL3_image/SDL_image.h>
 #include <SDL3_ttf/SDL_ttf.h>
 #include <sol/sol.hpp>
 #include <string>
@@ -8,56 +8,56 @@
 
 class VNEngine {
 public:
-  VNEngine(SDL_Renderer *renderer, int screenWidth, int screenHeight);
-  ~VNEngine();
+  VNEngine() = default;
+  ~VNEngine() { ShutDown(); }
+
+  bool Init(const char *title, int w, int h, bool fullscreen);
+  void ShutDown();
+
+  SDL_Renderer *Renderer() const { return m_renderer; }
+  int Width() const { return m_screenWidth; }
+  int Height() const { return m_screenHeight; }
 
   void LoadScript(const std::string &filename);
   void Reset();
-
   void HandleEvent(const SDL_Event *event);
-  void Update(float deltaTime);
+  void Update(float dt);
   void Draw();
-
   bool IsFinished() const { return m_scriptFinished; }
 
 private:
-  SDL_Renderer *m_renderer;
-  int m_screenWidth;
-  int m_screenHeight;
+  SDL_Window *m_window = nullptr;
+  SDL_Renderer *m_renderer = nullptr;
+  int m_screenWidth = 0;
+  int m_screenHeight = 0;
   TTF_Font *m_font = nullptr;
 
-  // Assets
   SDL_Texture *m_background = nullptr;
   SDL_Texture *m_textBox = nullptr;
   SDL_Texture *m_nameBox = nullptr;
   std::unordered_map<std::string, SDL_Texture *> m_characters;
 
-  // Script state
   sol::state m_lua;
   bool m_scriptFinished = false;
 
-  // Current dialogue
   std::string m_currentSpeaker;
   std::string m_currentName;
   std::string m_currentText;
 
-  // Typewriter
-  float m_typewriterTimer = 0.0f;
+  float m_typewriterTimer = 0.f;
   int m_displayedChars = 0;
-  static constexpr float CHARS_PER_SECOND = 60.0f;
+  static constexpr float CHARS_PER_SECOND = 60.f;
 
-  // Lua-exposed methods
   void ShowBackground(const std::string &filename);
-  void ShowCharacter(const std::string &characterId,
-                     const std::string &position = "center");
-  void HideCharacter(const std::string &characterId);
+  void ShowCharacter(const std::string &id, const std::string &pos = "center");
+  void HideCharacter(const std::string &id);
   void Say(const std::string &speaker, const std::string &name,
            const std::string &text);
   void Narrate(const std::string &text);
 
-  // Helpers
   SDL_Texture *LoadTexture(const std::string &path);
   SDL_Texture *CreateSolidTexture(int w, int h, Uint8 r, Uint8 g, Uint8 b,
                                   Uint8 a);
   SDL_Texture *RenderText(const std::string &text, SDL_Color color);
+  SDL_Renderer *CreateBestRenderer(SDL_Window *win);
 };
