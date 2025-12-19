@@ -158,6 +158,39 @@ SDL_Texture *VNEngine::CreateSolidTexture(int, int, Uint8, Uint8, Uint8,
 SDL_Texture *VNEngine::RenderText(const std::string &, SDL_Color) {
   return nullptr;
 }
-SDL_Renderer *VNEngine::CreateBestRenderer(SDL_Window *) { return nullptr; }
+SDL_Renderer *VNEngine::CreateBestRenderer(SDL_Window *window) {
+  const char *preferred_drivers[] = {"gpu", "vulkan", "opengl", "opengles2"};
+  const int num_preferred =
+      sizeof(preferred_drivers) / sizeof(preferred_drivers[0]);
+
+  for (int i = 0; i < num_preferred; ++i) {
+    const char *name = preferred_drivers[i];
+    SDL_Renderer *renderer = SDL_CreateRenderer(window, name);
+    if (renderer) {
+      SDL_Log("Successfully created renderer: %s", name);
+
+      // Enable VSync here — after successful creation!
+      if (SDL_SetRenderVSync(renderer, 1)) {
+        SDL_Log("VSync enabled successfully.");
+      } else {
+        std::cerr << "Warning: VSync failed (" << SDL_GetError()
+                  << "), continuing without it.\n";
+      }
+
+      return renderer;
+    } else {
+      std::cout << "Failed to create renderer '" << name
+                << "': " << SDL_GetError() << "\n";
+    }
+  }
+
+  // Fallback
+  SDL_Renderer *renderer = SDL_CreateRenderer(window, nullptr);
+  if (renderer) {
+    std::cout << "Fallback renderer created.\n";
+    SDL_SetRenderVSync(renderer, 1); // Try VSync on fallback too
+  }
+  return renderer;
+}
 
 void VNEngine::HandleSDLEvent(const SDL_Event &) {}
