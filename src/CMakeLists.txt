@@ -1,13 +1,16 @@
 file(GLOB_RECURSE SRC CONFIGURE_DEPENDS
      "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
 
-add_library(VisualNovelEngine STATIC ${SRC})
+add_library(VNEngine STATIC ${SRC})
 
-target_include_directories(VisualNovelEngine
-  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(VNEngine
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/../include
+)
 
-target_link_libraries(VisualNovelEngine PUBLIC vendor)
+target_link_libraries(VNEngine PUBLIC vendor)
 
-target_include_directories(VisualNovelEngine
+target_include_directories(VNEngine
   PUBLIC vendor/sol2/include
 )
+
