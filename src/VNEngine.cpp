@@ -8,7 +8,7 @@ bool VNEngine::Init(const char *title, int w, int h, bool fullscreen) {
     return false;
   }
 
-  if (TTF_Init() < 0) {
+  if (TTF_Init() == false) {
     std::cerr << "TTF_Init failed: " << SDL_GetError() << '\n';
     return false;
   }
